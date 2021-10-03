@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import pymongo
 from datetime import datetime, timedelta
 import requests
+import json
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["20mining"]
@@ -32,14 +34,16 @@ myquery = {
 mydocs = stories.find(myquery)
 
 for x in mydocs:
-    # Get Comments
-    r = requests.get(com_url+x['_id']+'&limit=2000')
-    r.encoding = 'utf-8'
-    comments.insert_one(r.json())
-
-
-
-
-    # Update Crawlcounter
-    stories.update_one({"_id": x['_id']},{"$set": {"crawl": x["crawl"]+1}})
-    
+    try:
+        # Get Comments
+        r = requests.get(com_url+x['_id']+'&limit=2000')
+        r.encoding = 'utf-8'
+        json_d = r.json()
+        json_d["content_id"] = x['_id']
+        json_d["time"] = d
+        comments.insert_one(json_d)
+        # Update Crawlcounter
+        stories.update_one({"_id": x['_id']},{"$set": {"crawl": x["crawl"]+1}})
+    except:
+        print("error, no comments")
+        continue
