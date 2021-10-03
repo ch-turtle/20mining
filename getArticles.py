@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import feedparser
 from pandas import json_normalize
 import pandas as pd
@@ -28,22 +29,14 @@ urls = df_news_feed['link'].values
 
 for i in urls:
     id = i.split("/")[3]
-    print(id)
     story = { "_id": id, "crawl": 0, "time": d}
     # If new article id: write to db and safe article, else pass
-    stories = mydb["stories"]
-    stories.insert_one(story)
-    articles = mydb["articles"]
-    r = requests.get(art_url+id)
-    r.encoding = 'utf-8'
-    articles.insert_one(r.json())
-    
-
-    
-
-
-
-
-	
-	
-	
+    try:
+    	stories = mydb["stories"]
+    	stories.insert_one(story)
+    	articles = mydb["articles"]
+    	r = requests.get(art_url+id)
+    	r.encoding = 'utf-8'
+    	articles.insert_one(r.json())
+    except:
+        continue
